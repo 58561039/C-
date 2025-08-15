@@ -144,11 +144,11 @@ malloc分配失败返回NULL，new分配失败返回std::bad_alloc异常
 const和指针
 
 ```C++
-int const*/const int*//不可以通过指针修改内容
+int const*/const int* //不可以通过指针修改内容
 
-int *const           //指向的位置不可变
+int *const            //指向的位置不可变
 
-const int *const     //指向的位置不可变，也无法通过指针修改内容
+const int *const      //指向的位置不可变，也无法通过指针修改内容
 ```
 
 
