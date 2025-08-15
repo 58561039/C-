@@ -117,8 +117,41 @@ char定义的数组默认最后一个元素是\0，定义char数组时，后面�
 
 ### 第八章 指针和引用
 
+1.
+
 ```C++
 int x=5;//整数
 int *p=&x;//一级指针
 int **q=&p;//二级指针
+```
+
+2.
+
+内存泄漏，new的内存没有delete。或者说malloc的内存没有free
+
+3.
+
+malloc/free    new/delete
+
+malloc和free是C语言，返回的指针默认是void*，实际使用需要强制类型转换
+
+new和delete是C++语言，当动态分配的内存存放的是对象时，释放内存时会自动调用析构函数，free不会自动调用
+
+malloc分配失败返回NULL，new分配失败返回std::bad_alloc异常
+
+4.
+
+const和指针
+
+```C++
+int const*/const int*//不可以通过指针修改内容
+
+int *const           //指向的位置不可变
+
+const int *const     //指向的位置不可变，也无法通过指针修改内容
+```
+
+
+
+### 第九章 类和对象
 ```
