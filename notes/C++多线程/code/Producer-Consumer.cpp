@@ -4,6 +4,7 @@
 #include<thread>
 #include<queue>
 //write by lzc
+//生产者-消费者模型
 
 std::mutex mtx;//互斥量
 std::condition_variable conv;//条件变量
