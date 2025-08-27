@@ -1,4 +1,3 @@
-#include<iostream>
 #include<string>
 //write by lzc
 //以日志类为例，练习单例模式中的饿汉模式
