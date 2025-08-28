@@ -700,3 +700,129 @@ std::forward<T>的作用是将参数按照原样（左值/右值）转发给其�
 
 #### (1)单例模式线程池
 
+
+## 五、异步并发
+
+### 1.async，future
+
+`std::future`是一个容器，<返回值类型>
+
+存储的内容是一个线程执行的结果，会在另一个线程计算结果，然后装在容器里等待被使用
+
+`std::async`是一个启动一个异步任务的工具，这两个搭配使用，调用`std::async`指定异步线程执行的内容和方式
+
+该函数第一个参数指定立即启动(`std::launch::async`)，还是等后续容器调用`get()`获得结果之后才启动—延迟启动(`std::launch::deferred`)
+
+```C++
+#include<iostream>
+#include<future>
+using namespace std;
+
+int func(){
+    int i=0;
+    for(i=0;i<1000;i++);
+    return i;
+}
+
+int main(){
+    std::future<int> futrue_result=std::async(std::launch::async,func);
+
+    cout<<func()<<endl;
+    cout<<futrue_result.get()<<endl;
+}
+```
+
+### 2.package_task
+
+`package_task`的作用是将一个函数对象打包，生成一个新的对象
+
+可以调用该对象的`get_future`函数返回一个`future`对象(异步线程结果存储容器)，并且需要手动创建线程，控制线程的`join`
+
+和`async`方法相比，这个方式更灵活。
+
+`async`方法要么立即执行，要么等到需要的时候，调用`get`的时候再执行
+
+而该方式可以控制执行的实际
+
+```C++
+#include<iostream>
+#include<future>
+using namespace std;
+
+int func(){
+    int i=0;
+    for(i=0;i<1000;i++);
+    return i;
+}
+
+int main(){
+
+    std::packaged_task<int(void)> task(func);//将函数包装为一个task
+
+    auto future_result=task.get_future();//获得该包装的future对象
+    std::thread t1(std::move(task));//异步线程执行该函数
+
+    cout<<func()<<endl;
+    t1.join();
+    cout<<future_result.get()<<endl;
+}
+```
+
+### 3.promise
+
+线程间通信，可以使用`promise`
+
+可以理解为，设置好`promise`，设置对应的`future`，将`promise`传递，对方线程修改结果
+
+该线程从`future`获取结果
+
+这是在线程运行过程中获取的
+
+```C++
+#include<iostream>
+#include<future>
+using namespace std;
+
+void func(std::promise<int> &prom){
+    /*线程自己一大堆计算*/
+    prom.set_value(45);//调用promise::set_value修改值
+}
+
+int main(){//主线程和子线程之间通信
+    std::promise<int> prom;
+    std::future<int> task=prom.get_future();//从future中获取结果
+    std::thread t1(func,std::ref(prom));
+    cout<<task.get()<<endl;
+    t1.join();
+}
+```
+
+### 4.atomic
+
+用`atomic`定义的变量，修改和读取是原子操作，效果类似于有一个互斥锁保护，但是实际效率要更高，速度更快
+
+```C++
+#include<iostream>
+#include<atomic>
+#include<thread>
+using namespace std;
+
+atomic<int> tmp;
+
+void func(){
+    for(int i=0;i<1000;i++){
+        tmp++;
+    }
+}
+
+int main(){
+    thread t1(func);
+    thread t2(func);
+    t1.join();
+    t2.join();
+    cout<<tmp<<endl;
+}
+```
+
+`atomic`还有读写函数，保证原子操作
+
